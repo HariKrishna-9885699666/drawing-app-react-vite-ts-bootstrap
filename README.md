@@ -5,7 +5,7 @@ A simple drawing application built with React, TypeScript. It allows users to dr
 
 ## Live Demo
 
-You can check out the live demo of the application here: [Drawing Application Demo](https://expense-tracker-vite-react-ts-redux.netlify.app/)
+You can check out the live demo of the application here: [Drawing Application Demo](https://drawing-app-react-vite-ts-bootstrap.netlify.app/)
 
 ## Features
 
