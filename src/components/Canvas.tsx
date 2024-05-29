@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect, MouseEvent } from 'react';
+// src/components/Canvas.tsx
+import React, { useRef, useState, useEffect, MouseEvent, TouchEvent } from 'react';
 
 interface CanvasProps {
   brushColor: string;
@@ -46,57 +47,72 @@ const Canvas: React.FC<CanvasProps> = ({
     }
   }, [brushColor, brushWidth, brushOpacity]);
 
-  const startDrawing = (e: MouseEvent) => {
+  const getOffset = (e: MouseEvent | TouchEvent) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    if ('touches' in e) {
+      const touch = e.touches[0];
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      };
+    }
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+  };
+
+  const startDrawing = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
+    const offset = getOffset(e);
     if (context) {
       context.strokeStyle = brushColor;
       context.lineWidth = brushWidth;
       context.globalAlpha = brushOpacity;
-      const { offsetX, offsetY } = e.nativeEvent;
-      setStartPos({ x: offsetX, y: offsetY });
+      setStartPos({ x: offset.x, y: offset.y });
       setIsDrawing(true);
       if (shape === 'brush') {
         context.beginPath();
-        context.moveTo(offsetX, offsetY);
+        context.moveTo(offset.x, offset.y);
       }
     }
   };
 
-  const draw = (e: MouseEvent) => {
+  const draw = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
     if (!isDrawing || !context) return;
-
-    const { offsetX, offsetY } = e.nativeEvent;
+    const offset = getOffset(e);
     if (shape === 'brush') {
-      context.lineTo(offsetX, offsetY);
+      context.lineTo(offset.x, offset.y);
       context.stroke();
     } else if (startPos) {
-      // Clear and redraw all shapes to keep canvas clean
       context.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
       context.fillStyle = 'white';
       context.fillRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
       redrawShapes();
-
       context.strokeStyle = brushColor;
       context.lineWidth = brushWidth;
       context.globalAlpha = brushOpacity;
       if (shape === 'circle') {
-        const radius = Math.sqrt(Math.pow(offsetX - startPos.x, 2) + Math.pow(offsetY - startPos.y, 2));
+        const radius = Math.sqrt(Math.pow(offset.x - startPos.x, 2) + Math.pow(offset.y - startPos.y, 2));
         context.beginPath();
         context.arc(startPos.x, startPos.y, radius, 0, 2 * Math.PI);
         context.stroke();
       } else if (shape === 'triangle') {
         context.beginPath();
         context.moveTo(startPos.x, startPos.y);
-        context.lineTo(offsetX, offsetY);
-        context.lineTo(startPos.x * 2 - offsetX, offsetY);
+        context.lineTo(offset.x, offset.y);
+        context.lineTo(startPos.x * 2 - offset.x, offset.y);
         context.closePath();
         context.stroke();
       }
     }
   };
 
-  const stopDrawing = (e: MouseEvent) => {
+  const stopDrawing = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
     if (context && startPos) {
-      const { offsetX, offsetY } = e.nativeEvent;
+      const offset = getOffset(e);
       const newShape: Shape = {
         type: shape,
         color: brushColor,
@@ -104,8 +120,8 @@ const Canvas: React.FC<CanvasProps> = ({
         opacity: brushOpacity,
         startX: startPos.x,
         startY: startPos.y,
-        endX: offsetX,
-        endY: offsetY,
+        endX: offset.x,
+        endY: offset.y,
       };
       setShapes([...shapes, newShape]);
       setIsDrawing(false);
@@ -167,15 +183,18 @@ const Canvas: React.FC<CanvasProps> = ({
         onMouseMove={draw}
         onMouseUp={stopDrawing}
         onMouseLeave={stopDrawing}
+        onTouchStart={startDrawing}
+        onTouchMove={draw}
+        onTouchEnd={stopDrawing}
         width={800}
         height={600}
         style={{ border: '1px solid #000' }}
       ></canvas>
       <div className="mt-3">
-        <button className="btn btn-primary" style={{ marginLeft: '1rem' }} onClick={downloadImage}>
+        <button className="btn btn-primary" onClick={downloadImage}>
           Download Drawing
         </button>
-        <button className="btn btn-primary" style={{marginLeft: '1rem'}} onClick={clearCanvas}>
+        <button className="btn btn-primary" style={{ marginLeft: '1rem' }} onClick={clearCanvas}>
           Clear Canvas
         </button>
       </div>
