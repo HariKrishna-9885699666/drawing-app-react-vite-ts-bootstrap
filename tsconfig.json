@@ -22,7 +22,6 @@
     "baseUrl": ".",
     "paths": {
       "@components/*": ["src/components/*"],
-      "@redux/*": ["src/redux/*"],
     }
   },
   "include": ["src"],

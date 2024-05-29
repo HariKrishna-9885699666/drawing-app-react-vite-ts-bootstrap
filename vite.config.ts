@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
         "@components": path.resolve(__dirname, "./src/components"),
-        "@redux": path.resolve(__dirname, "./src/redux"),
         "~bootstrap": path.resolve(__dirname, "node_modules/bootstrap"), // Alias for Bootstrap
       },
     },
