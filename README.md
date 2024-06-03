@@ -34,6 +34,7 @@ You can check out the live demo of the application here: [Drawing Application De
 2. **Clone the repository:**
    ```bash
    git clone https://github.com/HariKrishna-9885699666/drawing-app-react-vite-ts-bootstrap.git
+   cd drawing-app-react-vite-ts-bootstrap
    npm install
    npm run dev
 
